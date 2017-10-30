@@ -3,6 +3,6 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.exception
+package com.tyro.spockdemo.ports.model
 
-class UserAlreadyExistsException : Exception()
+class UserModel(val username: String, val encryptedPassword: String)

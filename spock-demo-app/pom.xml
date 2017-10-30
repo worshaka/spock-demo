@@ -39,19 +39,11 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-data-starter-jpa</artifactId>
-        </dependency>
 
         <!-- Kotlin -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jre8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
         </dependency>
 
         <!-- Third Party -->
@@ -88,7 +80,6 @@
             <artifactId>spock-spring</artifactId>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 </project>

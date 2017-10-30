@@ -35,6 +35,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
             </plugin>
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -66,12 +67,12 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-maven-noarg</artifactId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <artifactId>kotlin-maven-noarg</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
@@ -131,11 +132,11 @@
                 <artifactId>kotlin-stdlib-jre8</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-reflect</artifactId>
-                <version>${kotlin.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.jetbrains.kotlin</groupId>-->
+                <!--<artifactId>kotlin-reflect</artifactId>-->
+                <!--<version>${kotlin.version}</version>-->
+            <!--</dependency>-->
 
             <!-- Groovy -->
             <dependency>
@@ -175,6 +176,7 @@
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
                 <version>1.8.9</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Test -->

@@ -3,7 +3,7 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.security
+package com.tyro.spockdemo.ports.security
 
 interface EncryptionService {
 

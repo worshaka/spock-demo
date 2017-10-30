@@ -5,11 +5,10 @@
  */
 package com.tyro.spockdemo.adapters.config
 
-import com.tyro.spockdemo.security.EncryptionService
-import com.tyro.spockdemo.service.UserService
+import com.tyro.spockdemo.ports.security.EncryptionService
+import com.tyro.spockdemo.ports.service.UserService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import spock.mock.DetachedMockFactory
 
 @TestConfiguration
