@@ -3,15 +3,13 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.ports.service
+package com.tyro.spockdemo.service
 
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
-import com.tyro.spockdemo.ports.model.UserCredentialsModel
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import javax.annotation.Resource
 import javax.transaction.Transactional
@@ -54,22 +52,5 @@ class UserServiceIT extends Specification {
 
         then:
         thrown(UserAlreadyExistsException)
-    }
-
-    @Unroll
-    def "should correctly authenticate a user with username: #username and password: #plainTextPassword"() {
-
-        given:
-        def encryptedPassword = encryptionService.encryptPassword('password')
-        userService.create(new UserModel('user', encryptedPassword))
-
-        expect:
-        userService.authenticate(new UserCredentialsModel(username, plainTextPassword)) == expectedResult
-
-        where:
-        username        |   plainTextPassword       |   expectedResult
-        'user'          |   'password'              |   true
-        'user'          |   'incorrectPassword'     |   false
-        'incorrectUser' |   'password'              |   false
     }
 }

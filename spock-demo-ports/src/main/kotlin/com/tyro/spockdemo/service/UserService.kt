@@ -3,14 +3,11 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.ports.service
+package com.tyro.spockdemo.service
 
-import com.tyro.spockdemo.ports.model.UserCredentialsModel
 import com.tyro.spockdemo.ports.model.UserModel
 
 interface UserService {
-
-    fun authenticate(userCredentialsModel: UserCredentialsModel): Boolean
 
     fun create(userModel: UserModel)
 

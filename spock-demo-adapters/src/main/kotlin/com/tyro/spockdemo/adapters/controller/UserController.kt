@@ -7,10 +7,9 @@ package com.tyro.spockdemo.adapters.controller
 
 import com.tyro.spockdemo.adapters.dto.AuthenticationDTO
 import com.tyro.spockdemo.adapters.dto.UserDTO
-import com.tyro.spockdemo.ports.model.UserCredentialsModel
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
-import com.tyro.spockdemo.ports.service.UserService
+import com.tyro.spockdemo.service.UserService
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod.GET
@@ -29,13 +28,10 @@ class UserController(private val userService: UserService, private val encryptio
 
     @RequestMapping("/authenticate", method = arrayOf(GET))
     fun authenticateUser(@RequestBody userDTO: UserDTO): AuthenticationDTO {
-        val userModel = userDTO.toUserCredentialsModel()
-        val isAuthenticated = userService.authenticate(userModel)
+        val userModel = userService.getUser(userDTO.username)
+        val isAuthenticated = userModel?.let { encryptionService.checkPassword(userDTO.password, it.encryptedPassword) } ?: false
         return AuthenticationDTO(isAuthenticated)
     }
 
     private fun UserDTO.toUserModel() = UserModel(username, encryptionService.encryptPassword(password))
-
-    private fun UserDTO.toUserCredentialsModel() = UserCredentialsModel(username, password)
 }
-
