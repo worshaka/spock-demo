@@ -7,7 +7,6 @@ package com.tyro.spockdemo.service
 
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
-import com.tyro.spockdemo.ports.security.EncryptionService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
@@ -21,36 +20,34 @@ class UserServiceIT extends Specification {
     @Resource
     private UserService userService
 
-    @Resource
-    private EncryptionService encryptionService
-
     def "should create a new user when calling the user service create operation"() {
 
-        given:
+        given: 'a new user'
         def username = 'username'
         def password = 'encryptedPassword'
         def userModel = new UserModel(username, password)
 
-        when:
+        when: 'the new user is created'
         userService.create(userModel)
 
-        then:
+        then: 'the user can be retrieved with the correct username and password fields'
         def savedUser = userService.getUser(username)
-        savedUser.username == username
-        savedUser.encryptedPassword == password
+        with(savedUser) {
+            this.username == username
+            this.encryptedPassword == password
+        }
     }
 
     def "should throw an exception when attempting to create a user with an existing username"() {
 
-        given:
-        def userModel1 = new UserModel('username', 'encryptedPassword')
-        def userModel2 = new UserModel('username', 'password1')
-        userService.create(userModel1)
+        given: 'an existing user'
+        def username = 'username'
+        userService.create(new UserModel('username', 'password1'))
 
-        when:
-        userService.create(userModel2)
+        when: 'attempting to create a new user with an existing username'
+        userService.create(new UserModel(username, 'differentPassword'))
 
-        then:
+        then: 'a UserAlreadyExistsException is thrown'
         thrown(UserAlreadyExistsException)
     }
 }
