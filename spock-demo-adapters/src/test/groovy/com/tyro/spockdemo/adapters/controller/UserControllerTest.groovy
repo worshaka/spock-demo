@@ -8,11 +8,11 @@ package com.tyro.spockdemo.adapters.controller
 import com.google.gson.Gson
 import com.tyro.spockdemo.adapters.AdapterTestBase
 import com.tyro.spockdemo.adapters.dto.AuthenticationDTO
-import com.tyro.spockdemo.adapters.dto.UserDTO
+import com.tyro.spockdemo.adapters.dto.NewUserDTO
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
-import com.tyro.spockdemo.service.UserService
+import com.tyro.spockdemo.ports.service.UserService
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -40,13 +40,16 @@ class UserControllerTest extends AdapterTestBase {
 
     def "should call the port service to create a user when the create user URI is invoked"() {
 
-        setup:
+        given:
         def username = 'username'
         def plainTextPassword = 'password'
         def encryptedPassword = 'encryptedPassword'
-        def userDTO = new UserDTO(username, plainTextPassword)
+        def firstName = 'Travis'
+        def surname = 'Jones'
+        def email = 'myEmail@domain.net'
+        def userDTO = createNewUserDTO(username, plainTextPassword, firstName, surname, email)
 
-        when: 'the create user URI is invoked with a given userDTO'
+        when: 'the createNewUser user URI is invoked with a given userDTO'
         mockMvc.perform(put('/api/v1/user')
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(userDTO)))
@@ -55,30 +58,38 @@ class UserControllerTest extends AdapterTestBase {
         then: 'the encryption service will encrypt the supplied plain text password'
         1 * encryptionService.encryptPassword(plainTextPassword) >> encryptedPassword
 
-        then: 'the user service will create the user with the given username and encrypted password'
-        1 * userService.create({ it.username == username && it.encryptedPassword == encryptedPassword } as UserModel)
+        then: 'the user service will create a new user with the given username, encrypted password and personal details'
+        1 * userService.createNewUser({ UserModel u ->
+            u.username == username &&
+                    u.encryptedPassword == encryptedPassword &&
+                    u.firstName == firstName &&
+                    u.surname == surname &&
+                    u.email == email
+        })
     }
 
     def "should report a HTTP 400 bad request if an exception occurs calling the create user port service"() {
 
-        when: 'the create user URI is invoked with a given userDTO containing a username that already exists'
+        when: 'the createNewUser user URI is invoked with a given userDTO containing a username that already exists'
         mockMvc.perform(put('/api/v1/user')
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(new UserDTO('username', 'password'))))
+                .content(gson.toJson(createNewUserDTO())))
                 .andExpect(status().is4xxClientError())
 
         then: 'the encryption service will encrypt the supplied plain text password'
         1 * encryptionService.encryptPassword(_ as String) >> "encryptedPassword"
 
-        then: 'the user service create function will throw a UserAlreadyExistsException'
-        1 * userService.create(_ as UserModel) >> { throw new UserAlreadyExistsException() }
+        then: 'the user service createNewUser function will throw a UserAlreadyExistsException'
+        1 * userService.createNewUser(_ as UserModel) >> { throw new UserAlreadyExistsException() }
     }
 
     @Unroll
-    def "should return the authentication status of #result for a user with the #password authentication details"() {
+    def "should return the authentication status of #result for a user with the #user.getEncryptedPassword() password"() {
 
-        setup:
-        def userDTO = new UserDTO(username, password)
+        given:
+        def username = 'username'
+        def plainTextPassword = 'password'
+        def userDTO = createNewUserDTO(username, plainTextPassword)
 
         when: 'the authenticate URI is invoked with a given userDTO'
         def mvcResult = mockMvc.perform(get('/api/v1/user/authenticate')
@@ -88,18 +99,28 @@ class UserControllerTest extends AdapterTestBase {
                 .andReturn()
 
         then: 'the user service will retrieve the user from the application for the given username'
-        1 * userService.getUser(username) >> new UserModel(username, encryptedPassword)
+        1 * userService.getUser(username) >> user
 
         then: 'the encryption service will check the given plain text password with the stored encrypted password'
-        1 * encryptionService.checkPassword(password, encryptedPassword) >> result
+        numberOfCheckPasswordCalls * encryptionService.checkPassword(plainTextPassword, user?.encryptedPassword ?: _) >> result
 
         and: 'the authenticate result is returned'
         def authenticationResult = gson.fromJson(mvcResult.response.contentAsString, AuthenticationDTO.class)
         authenticationResult.isAuthenticated == result
 
         where:
-        username | password    | encryptedPassword  |   result
-        'user1'  | 'correct'   | 'encrypted1'       |   true
-        'user2'  | 'incorrect' | 'encrypted2'       |   false
+        user                                        |   numberOfCheckPasswordCalls  |   result
+        createUserModel('username', 'correct')      |   1                           |   true
+        createUserModel('username', 'incorrect')    |   1                           |   false
+        null                                        |   0                           |   false
+    }
+
+    static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis',
+                            String surname = 'Jones', String email = 'default@domain.net') {
+        new NewUserDTO(username, password, firstName, surname, email)
+    }
+
+    static createUserModel(String username, String encryptedPassword) {
+        new UserModel(username, encryptedPassword, _ as String, _ as String, _ as String)
     }
 }

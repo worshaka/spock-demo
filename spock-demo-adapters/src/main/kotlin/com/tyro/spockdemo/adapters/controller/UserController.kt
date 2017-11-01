@@ -6,10 +6,10 @@
 package com.tyro.spockdemo.adapters.controller
 
 import com.tyro.spockdemo.adapters.dto.AuthenticationDTO
-import com.tyro.spockdemo.adapters.dto.UserDTO
+import com.tyro.spockdemo.adapters.dto.NewUserDTO
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
-import com.tyro.spockdemo.service.UserService
+import com.tyro.spockdemo.ports.service.UserService
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod.GET
@@ -21,17 +21,23 @@ import org.springframework.web.bind.annotation.RestController
 class UserController(private val userService: UserService, private val encryptionService: EncryptionService) {
 
     @RequestMapping(method = arrayOf(PUT))
-    fun createNewUser(@RequestBody userDTO: UserDTO) {
-        val userModel = userDTO.toUserModel()
-        userService.create(userModel)
+    fun createNewUser(@RequestBody newUserDTO: NewUserDTO) {
+        val userModel = newUserDTO.toUserModel()
+        userService.createNewUser(userModel)
     }
 
     @RequestMapping("/authenticate", method = arrayOf(GET))
-    fun authenticateUser(@RequestBody userDTO: UserDTO): AuthenticationDTO {
+    fun authenticateUser(@RequestBody userDTO: NewUserDTO): AuthenticationDTO {
         val userModel = userService.getUser(userDTO.username)
         val isAuthenticated = userModel?.let { encryptionService.checkPassword(userDTO.password, it.encryptedPassword) } ?: false
         return AuthenticationDTO(isAuthenticated)
     }
 
-    private fun UserDTO.toUserModel() = UserModel(username, encryptionService.encryptPassword(password))
+    private fun NewUserDTO.toUserModel() = UserModel(
+            username,
+            encryptionService.encryptPassword(password),
+            firstName,
+            surname,
+            email
+    )
 }

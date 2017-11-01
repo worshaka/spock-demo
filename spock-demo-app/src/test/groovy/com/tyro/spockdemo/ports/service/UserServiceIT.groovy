@@ -7,6 +7,7 @@ package com.tyro.spockdemo.service
 
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
+import com.tyro.spockdemo.ports.service.UserService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 

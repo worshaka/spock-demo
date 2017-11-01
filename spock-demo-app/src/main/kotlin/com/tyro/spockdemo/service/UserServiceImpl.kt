@@ -8,6 +8,7 @@ package com.tyro.spockdemo.service
 import com.tyro.spockdemo.entity.User
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
+import com.tyro.spockdemo.ports.service.UserService
 import com.tyro.spockdemo.repository.UserRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -17,7 +18,7 @@ import javax.transaction.Transactional
 class UserServiceImpl(private val userRepository: UserRepository) : UserService {
 
     @Throws(UserAlreadyExistsException::class)
-    override fun create(userModel: UserModel) {
+    override fun createNewUser(userModel: UserModel) {
         getUser(userModel.username)?.let { throw UserAlreadyExistsException() } ?: userRepository.save(userModel.toUser())
     }
 
@@ -26,4 +27,4 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
 
 private fun UserModel.toUser() = User(username, encryptedPassword)
 
-private fun User.toUserModel() = UserModel(username, password)
+private fun User.toUserModel() = UserModel(username, password, "", "", "")
