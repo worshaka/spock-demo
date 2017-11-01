@@ -109,10 +109,10 @@ class UserControllerTest extends AdapterTestBase {
         authenticationResult.isAuthenticated == result
 
         where:
-        user                                        |   numberOfCheckPasswordCalls  |   result
-        createUserModel('username', 'correct')      |   1                           |   true
-        createUserModel('username', 'incorrect')    |   1                           |   false
-        null                                        |   0                           |   false
+        user                                     | numberOfCheckPasswordCalls | result
+        createUserModel('username', 'correct')   | 1                          | true
+        createUserModel('username', 'incorrect') | 1                          | false
+        null                                     | 0                          | false
     }
 
     static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis',
