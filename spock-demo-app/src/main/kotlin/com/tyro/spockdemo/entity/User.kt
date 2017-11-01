@@ -9,4 +9,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable
 import javax.persistence.Entity
 
 @Entity
-class User(val username: String, val password: String) : AbstractPersistable<Long>()
+class User(
+        val username: String,
+        val password: String,
+        val firstName: String,
+        val surname: String,
+        val email: String
+
+) : AbstractPersistable<Long>()

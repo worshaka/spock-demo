@@ -132,11 +132,6 @@
                 <artifactId>kotlin-stdlib-jre8</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>org.jetbrains.kotlin</groupId>-->
-                <!--<artifactId>kotlin-reflect</artifactId>-->
-                <!--<version>${kotlin.version}</version>-->
-            <!--</dependency>-->
 
             <!-- Groovy -->
             <dependency>
@@ -180,12 +175,6 @@
             </dependency>
 
             <!-- Test -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-core</artifactId>

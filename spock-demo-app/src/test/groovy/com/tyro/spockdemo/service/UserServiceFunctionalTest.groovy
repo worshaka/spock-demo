@@ -7,7 +7,6 @@ package com.tyro.spockdemo.service
 
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
-import com.tyro.spockdemo.ports.service.UserService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
@@ -16,7 +15,7 @@ import javax.transaction.Transactional
 
 @SpringBootTest
 @Transactional
-class UserServiceIT extends Specification {
+class UserServiceFunctionalTest extends Specification {
 
     @Resource
     private UserService userService
@@ -26,16 +25,21 @@ class UserServiceIT extends Specification {
         given: 'a new user'
         def username = 'username'
         def password = 'encryptedPassword'
-        def userModel = new UserModel(username, password)
+        def firstName = 'Travis'
+        def surname = 'Jones'
+        def email = 'fake@domain.net'
+        def userModel = createUserModel(username, password, firstName, surname, email)
 
         when: 'the new user is created'
-        userService.create(userModel)
+        userService.createNewUser(userModel)
 
-        then: 'the user can be retrieved with the correct username and password fields'
-        def savedUser = userService.getUser(username)
-        with(savedUser) {
-            this.username == username
-            this.encryptedPassword == password
+        then: 'the user can be retrieved with the correct field values'
+        with(userService.getUser(username)) {
+            getUsername() == username
+            getEncryptedPassword() == password
+            getFirstName() == firstName
+            getSurname() == surname
+            getEmail() == email
         }
     }
 
@@ -43,12 +47,18 @@ class UserServiceIT extends Specification {
 
         given: 'an existing user'
         def username = 'username'
-        userService.create(new UserModel('username', 'password1'))
+        userService.createNewUser(createUserModel(username))
 
         when: 'attempting to create a new user with an existing username'
-        userService.create(new UserModel(username, 'differentPassword'))
+        userService.createNewUser(createUserModel(username))
 
         then: 'a UserAlreadyExistsException is thrown'
         thrown(UserAlreadyExistsException)
+    }
+
+    static UserModel createUserModel(String username = 'username', String password = 'encryptedPassword', String firstName = 'Travis', String surname = 'Jones',
+                                     String email = 'fake@domain.net') {
+
+        new UserModel(username, password, firstName, surname, email)
     }
 }
