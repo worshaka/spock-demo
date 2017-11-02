@@ -5,7 +5,7 @@
  */
 package com.tyro.spockdemo.adapters.controller
 
-import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
+import com.tyro.spockdemo.ports.exception.UserException
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -16,6 +16,6 @@ class ExceptionControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(BAD_REQUEST)
-    fun handleUserAlreadyExistsException(ex: UserAlreadyExistsException) {
+    fun handleUserAlreadyExistsException(ex: UserException) {
     }
 }

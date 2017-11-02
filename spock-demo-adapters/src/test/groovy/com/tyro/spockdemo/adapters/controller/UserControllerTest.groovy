@@ -12,6 +12,7 @@ import com.tyro.spockdemo.adapters.dto.in.UpdateUserDTO
 import com.tyro.spockdemo.adapters.dto.out.AuthenticationResultDTO
 import com.tyro.spockdemo.adapters.dto.in.NewUserDTO
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
+import com.tyro.spockdemo.ports.exception.UserDoesNotExistException
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
 import com.tyro.spockdemo.service.UserService
@@ -45,6 +46,10 @@ class UserControllerTest extends AdapterTestBase {
                             String email = 'default@domain.net') {
 
         new NewUserDTO(username, password, firstName, surname, email)
+    }
+
+    static createUpdateUserDTO() {
+        new UpdateUserDTO(_ as String, _ as String, _ as String, _ as String, _ as String, _ as String)
     }
 
     static createUserModel(String username, String encryptedPassword) {
@@ -85,17 +90,17 @@ class UserControllerTest extends AdapterTestBase {
 
     def "should report a HTTP 400 bad request if an exception occurs calling the create user port service"() {
 
-        when: 'the createNewUser user URI is invoked with a given userDTO containing a username that already exists'
+        given: 'the encryption service will encrypt the supplied plain text password'
+        encryptionService.encryptPassword(_ as String) >> 'encryptedPassword'
+
+        and: 'the user service createNewUser function will throw a UserAlreadyExistsException'
+        userService.createNewUser(_ as UserModel) >> { throw new UserAlreadyExistsException() }
+
+        expect: 'a HTTP 400 bad request when attempting to create a new user with an existing username'
         mockMvc.perform(put('/api/v1/user')
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(createNewUserDTO())))
                 .andExpect(status().is4xxClientError())
-
-        then: 'the encryption service will encrypt the supplied plain text password'
-        1 * encryptionService.encryptPassword(_ as String) >> "encryptedPassword"
-
-        then: 'the user service createNewUser function will throw a UserAlreadyExistsException'
-        1 * userService.createNewUser(_ as UserModel) >> { throw new UserAlreadyExistsException() }
     }
 
     @Unroll
@@ -149,7 +154,7 @@ class UserControllerTest extends AdapterTestBase {
         then:
         1 * userService.updateUser(_ as String, _ as UserModel) >> { String currentUsername, UserModel userModel ->
             currentUsername == existingUsername
-            with (userModel) {
+            with(userModel) {
                 username == newUsername
                 encryptedPassword == newEncryptedPassword
                 firstName == newFirstName
@@ -162,5 +167,20 @@ class UserControllerTest extends AdapterTestBase {
         existingUsername | newUsername | newPassword   | newFirstName | newSurname | newEmail
         'user'           | 'newUser'   | 'newPassword' | 'John'       | 'Snow'     | 'jsnow@thewall.org'
         'user'           | 'user'      | 'password'    | 'Travis'     | 'Jones'    | 'tjones@tyro.com'
+    }
+
+    def "should report a HTTP 400 bad request if an exception occurs calling the update user port service"() {
+
+        given: 'the encryption service will encrypt the supplied plain text password'
+        encryptionService.encryptPassword(_ as String) >> 'encryptedPassword'
+
+        and: 'the user service updateUser function will throw a UserDoesNotExistException'
+        userService.updateUser(_ as String, _ as UserModel) >> { throw new UserDoesNotExistException() }
+
+        expect: 'a HTTP 400 bad request when attempting to update an existing user'
+        mockMvc.perform(post('/api/v1/user')
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createUpdateUserDTO())))
+                .andExpect(status().is4xxClientError())
     }
 }

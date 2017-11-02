@@ -5,4 +5,8 @@
  */
 package com.tyro.spockdemo.ports.exception
 
-class UserAlreadyExistsException : Exception()
+open class UserException : Exception()
+
+class UserAlreadyExistsException : UserException()
+
+class UserDoesNotExistException : UserException()
