@@ -48,25 +48,27 @@ class UserControllerTest extends AdapterTestBase {
         def firstName = 'Travis'
         def surname = 'Jones'
         def email = 'myEmail@domain.net'
-        def userDTO = createNewUserDTO(username, plainTextPassword, firstName, surname, email)
+        def newUserDTO = createNewUserDTO(username, plainTextPassword, firstName, surname, email)
 
-        when: 'the createNewUser user URI is invoked with a given userDTO'
+        when: 'the createNewUser user URI is invoked with a given NewUserDTO'
         mockMvc.perform(put('/api/v1/user')
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(userDTO)))
+                .content(gson.toJson(newUserDTO)))
                 .andExpect(status().isOk())
 
         then: 'the encryption service will encrypt the supplied plain text password'
         1 * encryptionService.encryptPassword(plainTextPassword) >> encryptedPassword
 
         then: 'the user service will create a new user with the given username, encrypted password and personal details'
-        1 * userService.createNewUser({ UserModel u ->
-            u.username == username &&
-                    u.encryptedPassword == encryptedPassword &&
-                    u.firstName == firstName &&
-                    u.surname == surname &&
-                    u.email == email
-        })
+        1 * userService.createNewUser(_ as UserModel) >> { UserModel userModel ->
+            with(userModel) {
+                getUsername() == username
+                getEncryptedPassword() == encryptedPassword
+                getFirstName() == firstName
+                getSurname() == surname
+                getEmail() == email
+            }
+        }
     }
 
     def "should report a HTTP 400 bad request if an exception occurs calling the create user port service"() {
@@ -85,7 +87,7 @@ class UserControllerTest extends AdapterTestBase {
     }
 
     @Unroll
-    def "should return the authentication status of #result for a user with the #user.getEncryptedPassword() password"() {
+    def "should return the authentication status of #result when #description"() {
 
         given:
         def username = 'username'
@@ -110,14 +112,15 @@ class UserControllerTest extends AdapterTestBase {
         authenticationResult.isAuthenticated == result
 
         where:
-        user                                     | numberOfCheckPasswordCalls | result
-        createUserModel('username', 'correct')   | 1                          | true
-        createUserModel('username', 'incorrect') | 1                          | false
-        null                                     | 0                          | false
+        user                                     | numberOfCheckPasswordCalls | result | description
+        createUserModel('username', 'correct')   | 1                          | true   | 'the username and password are correct'
+        createUserModel('username', 'incorrect') | 1                          | false  | 'the username is correct but the password is incorrect'
+        null                                     | 0                          | false  | 'the username does not exist'
     }
 
-    static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis',
-                            String surname = 'Jones', String email = 'default@domain.net') {
+    static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis', String surname = 'Jones',
+                            String email = 'default@domain.net') {
+
         new NewUserDTO(username, password, firstName, surname, email)
     }
 
