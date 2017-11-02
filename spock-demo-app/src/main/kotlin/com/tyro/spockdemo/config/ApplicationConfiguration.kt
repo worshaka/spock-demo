@@ -3,7 +3,7 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.configuration
+package com.tyro.spockdemo.config
 
 import org.jasypt.util.password.BasicPasswordEncryptor
 import org.jasypt.util.password.PasswordEncryptor
