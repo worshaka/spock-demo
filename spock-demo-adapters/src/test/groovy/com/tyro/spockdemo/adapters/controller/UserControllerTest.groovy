@@ -8,6 +8,7 @@ package com.tyro.spockdemo.adapters.controller
 import com.google.gson.Gson
 import com.tyro.spockdemo.adapters.AdapterTestBase
 import com.tyro.spockdemo.adapters.dto.in.AuthenticateUserDTO
+import com.tyro.spockdemo.adapters.dto.in.UpdateUserDTO
 import com.tyro.spockdemo.adapters.dto.out.AuthenticationResultDTO
 import com.tyro.spockdemo.adapters.dto.in.NewUserDTO
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
@@ -22,6 +23,7 @@ import spock.lang.Unroll
 import javax.annotation.Resource
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -38,6 +40,16 @@ class UserControllerTest extends AdapterTestBase {
     private EncryptionService encryptionService
 
     private Gson gson = new Gson()
+
+    static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis', String surname = 'Jones',
+                            String email = 'default@domain.net') {
+
+        new NewUserDTO(username, password, firstName, surname, email)
+    }
+
+    static createUserModel(String username, String encryptedPassword) {
+        new UserModel(username, encryptedPassword, _ as String, _ as String, _ as String)
+    }
 
     def "should call the port service to create a user when the create user URI is invoked"() {
 
@@ -118,13 +130,37 @@ class UserControllerTest extends AdapterTestBase {
         null                                     | 0                          | false  | 'the username does not exist'
     }
 
-    static createNewUserDTO(String username = 'username', String password = 'password', String firstName = 'Travis', String surname = 'Jones',
-                            String email = 'default@domain.net') {
+    def "should update a user with new details"() {
 
-        new NewUserDTO(username, password, firstName, surname, email)
-    }
+        given:
+        def updateUserDTO = new UpdateUserDTO(existingUsername, newUsername, newPassword, newFirstName, newSurname, newEmail)
+        def newEncryptedPassword = 'encryptedPassword'
 
-    static createUserModel(String username, String encryptedPassword) {
-        new UserModel(username, encryptedPassword, _ as String, _ as String, _ as String)
+        when:
+        mockMvc.perform(post('/api/v1/user')
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(updateUserDTO)))
+                .andExpect(status().isOk())
+                .andReturn()
+
+        then:
+        1 * encryptionService.encryptPassword(newPassword) >> newEncryptedPassword
+
+        then:
+        1 * userService.updateUser(_ as String, _ as UserModel) >> { String currentUsername, UserModel userModel ->
+            currentUsername == existingUsername
+            with (userModel) {
+                username == newUsername
+                encryptedPassword == newEncryptedPassword
+                firstName == newFirstName
+                surname == newSurname
+                email == newEmail
+            }
+        }
+
+        where:
+        existingUsername | newUsername | newPassword   | newFirstName | newSurname | newEmail
+        'user'           | 'newUser'   | 'newPassword' | 'John'       | 'Snow'     | 'jsnow@thewall.org'
+        'user'           | 'user'      | 'password'    | 'Travis'     | 'Jones'    | 'tjones@tyro.com'
     }
 }

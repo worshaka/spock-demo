@@ -22,6 +22,10 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
     }
 
     override fun getUser(username: String): UserModel? = userRepository.findByUsername(username)?.toUserModel()
+
+    override fun updateUser(existingUsername: String, updatedUserModel: UserModel) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }
 
 private fun UserModel.toUser() = User(username, encryptedPassword, firstName, surname, email)

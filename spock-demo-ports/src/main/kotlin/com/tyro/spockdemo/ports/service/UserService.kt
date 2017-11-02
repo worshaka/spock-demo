@@ -12,4 +12,6 @@ interface UserService {
     fun createNewUser(userModel: UserModel)
 
     fun getUser(username: String): UserModel?
+
+    fun updateUser(existingUsername: String, updatedUserModel: UserModel)
 }
