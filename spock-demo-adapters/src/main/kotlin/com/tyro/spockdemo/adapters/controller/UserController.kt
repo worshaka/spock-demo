@@ -5,8 +5,9 @@
  */
 package com.tyro.spockdemo.adapters.controller
 
-import com.tyro.spockdemo.adapters.dto.AuthenticationDTO
-import com.tyro.spockdemo.adapters.dto.NewUserDTO
+import com.tyro.spockdemo.adapters.dto.`in`.AuthenticateUserDTO
+import com.tyro.spockdemo.adapters.dto.out.AuthenticationResultDTO
+import com.tyro.spockdemo.adapters.dto.`in`.NewUserDTO
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
 import com.tyro.spockdemo.ports.service.UserService
@@ -27,10 +28,10 @@ class UserController(private val userService: UserService, private val encryptio
     }
 
     @RequestMapping("/authenticate", method = arrayOf(GET))
-    fun authenticateUser(@RequestBody userDTO: NewUserDTO): AuthenticationDTO {
+    fun authenticateUser(@RequestBody userDTO: AuthenticateUserDTO): AuthenticationResultDTO {
         val userModel = userService.getUser(userDTO.username)
         val isAuthenticated = userModel?.let { encryptionService.checkPassword(userDTO.password, it.encryptedPassword) } ?: false
-        return AuthenticationDTO(isAuthenticated)
+        return AuthenticationResultDTO(isAuthenticated)
     }
 
     private fun NewUserDTO.toUserModel() = UserModel(

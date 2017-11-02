@@ -7,8 +7,9 @@ package com.tyro.spockdemo.adapters.controller
 
 import com.google.gson.Gson
 import com.tyro.spockdemo.adapters.AdapterTestBase
-import com.tyro.spockdemo.adapters.dto.AuthenticationDTO
-import com.tyro.spockdemo.adapters.dto.NewUserDTO
+import com.tyro.spockdemo.adapters.dto.in.AuthenticateUserDTO
+import com.tyro.spockdemo.adapters.dto.out.AuthenticationResultDTO
+import com.tyro.spockdemo.adapters.dto.in.NewUserDTO
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
@@ -89,12 +90,12 @@ class UserControllerTest extends AdapterTestBase {
         given:
         def username = 'username'
         def plainTextPassword = 'password'
-        def userDTO = createNewUserDTO(username, plainTextPassword)
+        def authenticateUserDTO = new AuthenticateUserDTO(username, plainTextPassword)
 
         when: 'the authenticate URI is invoked with a given userDTO'
         def mvcResult = mockMvc.perform(get('/api/v1/user/authenticate')
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(userDTO)))
+                .content(gson.toJson(authenticateUserDTO)))
                 .andExpect(status().isOk())
                 .andReturn()
 
@@ -105,7 +106,7 @@ class UserControllerTest extends AdapterTestBase {
         numberOfCheckPasswordCalls * encryptionService.checkPassword(plainTextPassword, user?.encryptedPassword ?: _) >> result
 
         and: 'the authenticate result is returned'
-        def authenticationResult = gson.fromJson(mvcResult.response.contentAsString, AuthenticationDTO.class)
+        def authenticationResult = gson.fromJson(mvcResult.response.contentAsString, AuthenticationResultDTO.class)
         authenticationResult.isAuthenticated == result
 
         where:

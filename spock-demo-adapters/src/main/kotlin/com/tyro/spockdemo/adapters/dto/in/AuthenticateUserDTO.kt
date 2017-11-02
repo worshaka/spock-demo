@@ -3,6 +3,6 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.adapters.dto
+package com.tyro.spockdemo.adapters.dto.`in`
 
-class AuthenticationDTO(val isAuthenticated: Boolean)
+class AuthenticateUserDTO(val username: String, val password: String)
