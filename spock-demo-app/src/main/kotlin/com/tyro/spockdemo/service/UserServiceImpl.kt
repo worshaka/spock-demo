@@ -3,10 +3,11 @@
  * Lv1, 155 Clarence St, Sydney NSW 2000.
  * All rights reserved.
  */
-package com.tyro.spockdemo.ports.service
+package com.tyro.spockdemo.service
 
 import com.tyro.spockdemo.entity.User
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
+import com.tyro.spockdemo.ports.exception.UserDoesNotExistException
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -23,8 +24,19 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
 
     override fun getUser(username: String): UserModel? = userRepository.findByUsername(username)?.toUserModel()
 
+    @Throws(UserDoesNotExistException::class)
     override fun updateUser(existingUsername: String, updatedUserModel: UserModel) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val user = userRepository.findByUsername(existingUsername)
+
+        userRepository.save(
+                user?.apply {
+                    username = updatedUserModel.username
+                    password = updatedUserModel.encryptedPassword
+                    firstName = updatedUserModel.firstName
+                    surname = updatedUserModel.surname
+                    email = updatedUserModel.email
+                } ?: throw UserDoesNotExistException()
+        )
     }
 }
 

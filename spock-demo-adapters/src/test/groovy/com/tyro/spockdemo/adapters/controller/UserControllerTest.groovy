@@ -14,7 +14,7 @@ import com.tyro.spockdemo.adapters.dto.in.NewUserDTO
 import com.tyro.spockdemo.ports.exception.UserAlreadyExistsException
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
-import com.tyro.spockdemo.ports.service.UserService
+import com.tyro.spockdemo.service.UserService
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc

@@ -10,10 +10,10 @@ import javax.persistence.Entity
 
 @Entity
 class User(
-        val username: String,
-        val password: String,
-        val firstName: String,
-        val surname: String,
-        val email: String
+        var username: String,
+        var password: String,
+        var firstName: String,
+        var surname: String,
+        var email: String
 
 ) : AbstractPersistable<Long>()

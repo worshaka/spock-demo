@@ -11,7 +11,7 @@ import com.tyro.spockdemo.adapters.dto.`in`.NewUserDTO
 import com.tyro.spockdemo.adapters.dto.`in`.UpdateUserDTO
 import com.tyro.spockdemo.ports.model.UserModel
 import com.tyro.spockdemo.ports.security.EncryptionService
-import com.tyro.spockdemo.ports.service.UserService
+import com.tyro.spockdemo.service.UserService
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod.GET
